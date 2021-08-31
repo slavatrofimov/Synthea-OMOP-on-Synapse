@@ -1,0 +1,1369 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {       
+        "companyTla": {
+            "type": "string",
+            "metadata": {
+                "description": "This is a Three Letter Acronym for your company name. 'CON' for Contoso for example."
+            }
+        },
+        "deploymentType": {
+            "type": "string",
+            "defaultValue": "poc",
+            "allowedValues": [
+                "devtest",
+                "poc",
+                "prod",
+                "shared"
+            ],
+            "metadata": {
+                "description": "Specify deployment type: DevTest, POC, Prod, Shared. This will also be used in the naming convention."
+            }
+        },
+        "ADLS_url": {
+            "type": "string",
+            "metadata": "URL of the Azure Data Lake Storage Account. E.g., https://mystorageaccount.dfs.core.windows.net/'"
+        },
+        "ADLS_accountKey": {
+            "type": "secureString",
+            "metadata": "Secure string for 'accountKey' of 'ADLS'"
+        },
+        "SynapseDedicatedSQLPool_connectionString": {
+            "type": "secureString",
+            "defaultValue": "Source=mySynapseSQLPool.sql.azuresynapse.net;Initial Catalog=myDatabaseName;User ID=mySQLAdminUserName;Password=myPassword;",
+            "metadata": "Secure string for 'connectionString' of 'SynapseDedicatedSQLPool'"
+        }
+    },
+    "variables": {
+        "factoryName": "[toLower(concat(parameters('companyTla'),parameters('deploymentType'), 'df1'))]",
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', variables('factoryName'))]",
+        "location": "[resourceGroup().location]"
+        },
+    "resources": [
+        {
+            "name": "[variables('factoryName')]",
+            "type": "Microsoft.DataFactory/factories",
+            "apiVersion": "2018-06-01",
+            "properties": {},
+            "dependsOn": [],
+            "location": "[variables('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/Synapse_DW')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Connection to the destination database.",
+                "linkedServiceName": {
+                    "referenceName": "SynapseDedicatedSQLPool",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "sinkTableName": {
+                        "type": "string"
+                    },
+                    "sinkSchemaName": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "type": "AzureSqlDWTable",
+                "schema": [],
+                "typeProperties": {
+                    "schema": {
+                        "value": "@dataset().sinkSchemaName",
+                        "type": "Expression"
+                    },
+                    "table": {
+                        "value": "@dataset().sinkTableName",
+                        "type": "Expression"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/linkedServices/SynapseDedicatedSQLPool')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/ADLS_ETLScripts')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Connection to a folder containing SQL scripts used for data transformation.",
+                "linkedServiceName": {
+                    "referenceName": "ADLS",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string"
+                    },
+                    "SourceDirectory": {
+                        "type": "string"
+                    },
+                    "SourceFile": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().SourceFile",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().SourceDirectory",
+                            "type": "Expression"
+                        },
+                        "fileSystem": {
+                            "value": "@dataset().SourceContainer",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": "~",
+                    "rowDelimiter": "~",
+                    "escapeChar": "",
+                    "quoteChar": ""
+                },
+                "schema": [
+                    {
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/linkedServices/ADLS')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/ADLS_AthenaVocabularyCSVs')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Connection to Athena vocabulary source files in CSV format.",
+                "linkedServiceName": {
+                    "referenceName": "ADLS",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "fileName": {
+                        "type": "string"
+                    },
+                    "SourceContainer": {
+                        "type": "string"
+                    },
+                    "SourceDirectory": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().fileName",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().SourceDirectory",
+                            "type": "Expression"
+                        },
+                        "fileSystem": {
+                            "value": "@dataset().SourceContainer",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": "\t",
+                    "rowDelimiter": "\n",
+                    "escapeChar": "",
+                    "firstRowAsHeader": true,
+                    "quoteChar": ""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/linkedServices/ADLS')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/ADLS_SyntheaCSVs')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Connection to your source data store.",
+                "linkedServiceName": {
+                    "referenceName": "ADLS",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "fileName": {
+                        "type": "string"
+                    },
+                    "SourceContainer": {
+                        "type": "string"
+                    },
+                    "SourceDirectory": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().fileName",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().SourceDirectory",
+                            "type": "Expression"
+                        },
+                        "fileSystem": {
+                            "value": "@dataset().SourceContainer",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": ",",
+                    "rowDelimiter": "\n",
+                    "escapeChar": "\"",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/linkedServices/ADLS')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/ADLS')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('ADLS_url')]",
+                    "accountKey": {
+                        "type": "SecureString",
+                        "value": "[parameters('ADLS_accountKey')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('factoryId')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/SynapseDedicatedSQLPool')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDW",
+                "typeProperties": {
+                    "connectionString": "[parameters('SynapseDedicatedSQLPool_connectionString')]"
+                }
+            },
+            "dependsOn": [
+                "[variables('factoryId')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/03-Stage Vocabulary Data to Synapse Tables')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Copy CSV files with Athena vocabulary data to corresponding staging tables in the Synapse Dedicated SQL Pool.",
+                "activities": [
+                    {
+                        "name": "Get CSV Files",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "ADLS_AthenaVocabularyCSVs",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "fileName": "/",
+                                    "SourceContainer": "@pipeline().parameters.SourceContainer",
+                                    "SourceDirectory": "@pipeline().parameters.SourceDirectory"
+                                }
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "recursive": true
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "For Each CSV File",
+                        "description": "For each CSV file, check if a corresponding table exists in the destination database and, if so, load the data file into the destination table.",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get CSV Files",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get CSV Files').output.childItems",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "Check Whether Destination Table Exists",
+                                    "type": "IfCondition",
+                                    "dependsOn": [
+                                        {
+                                            "activity": "Lookup Sink Table",
+                                            "dependencyConditions": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    ],
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "expression": {
+                                            "value": "@equals(activity('Lookup Sink Table').output.firstRow.TableExists,1)",
+                                            "type": "Expression"
+                                        },
+                                        "ifTrueActivities": [
+                                            {
+                                                "name": "Copy Data File to Corresponding Staging Table",
+                                                "description": "Copy data file to the corresponding destination table. It is assumed that the data file and the table share a common schema.",
+                                                "type": "Copy",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "timeout": "7.00:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [
+                                                    {
+                                                        "name": "Entity",
+                                                        "value": "@item().name"
+                                                    }
+                                                ],
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "DelimitedTextSource",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSReadSettings",
+                                                            "recursive": true
+                                                        },
+                                                        "formatSettings": {
+                                                            "type": "DelimitedTextReadSettings"
+                                                        }
+                                                    },
+                                                    "sink": {
+                                                        "type": "SqlDWSink",
+                                                        "preCopyScript": {
+                                                            "value": "@{concat('TRUNCATE TABLE [', pipeline().parameters.StagingSchemaName, '].[', replace(item().name,'.csv',''), ']')}",
+                                                            "type": "Expression"
+                                                        },
+                                                        "allowPolyBase": true,
+                                                        "polyBaseSettings": {
+                                                            "rejectValue": 0,
+                                                            "rejectType": "value",
+                                                            "useTypeDefault": false
+                                                        },
+                                                        "disableMetricsCollection": false
+                                                    },
+                                                    "enableStaging": false
+                                                },
+                                                "inputs": [
+                                                    {
+                                                        "referenceName": "ADLS_AthenaVocabularyCSVs",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "fileName": "@item().name",
+                                                            "SourceContainer": "@pipeline().parameters.SourceContainer",
+                                                            "SourceDirectory": "@pipeline().parameters.SourceDirectory"
+                                                        }
+                                                    }
+                                                ],
+                                                "outputs": [
+                                                    {
+                                                        "referenceName": "Synapse_DW",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "sinkTableName": {
+                                                                "value": "@replace(item().name,'.csv','')",
+                                                                "type": "Expression"
+                                                            },
+                                                            "sinkSchemaName": {
+                                                                "value": "@pipeline().parameters.StagingSchemaName",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "Copy Data To Permanent Table",
+                                                "type": "SqlServerStoredProcedure",
+                                                "dependsOn": [
+                                                    {
+                                                        "activity": "Copy Data File to Corresponding Staging Table",
+                                                        "dependencyConditions": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                ],
+                                                "policy": {
+                                                    "timeout": "7.00:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "storedProcedureName": "sp_executesql",
+                                                    "storedProcedureParameters": {
+                                                        "stmt": {
+                                                            "value": {
+                                                                "value": "@concat('INSERT INTO [', pipeline().parameters.SinkSchemaName, '].[', replace(item().name,'.csv',''), '] SELECT * FROM [',pipeline().parameters.StagingSchemaName,'].[',replace(item().name,'.csv', ''),']')",
+                                                                "type": "Expression"
+                                                            },
+                                                            "type": "String"
+                                                        }
+                                                    }
+                                                },
+                                                "linkedServiceName": {
+                                                    "referenceName": "SynapseDedicatedSQLPool",
+                                                    "type": "LinkedServiceReference"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "Lookup Sink Table",
+                                    "description": "Lookup Whether the Destination Table Exists",
+                                    "type": "Lookup",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Entity",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "SqlDWSource",
+                                            "sqlReaderQuery": {
+                                                "value": "@concat('SELECT COUNT(*) AS TableExists\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = ''',pipeline().parameters.StagingSchemaName, '''\n\tAND TABLE_NAME = ''',replace(item().name,'.csv',''),'''')\n",
+                                                "type": "Expression"
+                                            },
+                                            "queryTimeout": "02:00:00",
+                                            "partitionOption": "None"
+                                        },
+                                        "dataset": {
+                                            "referenceName": "Synapse_DW",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "sinkTableName": "INFORMATION_SCHEMA",
+                                                "sinkSchemaName": "TABLES"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string",
+                        "defaultValue": "synthea-omop"
+                    },
+                    "SourceDirectory": {
+                        "type": "string",
+                        "defaultValue": "Vocab SNOMED_LOINC_CVX_RXNORM"
+                    },
+                    "SinkSchemaName": {
+                        "type": "string",
+                        "defaultValue": "omop"
+                    },
+                    "StagingSchemaName": {
+                        "type": "string",
+                        "defaultValue": "vocab"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-05-16T15:15:16Z"
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/datasets/ADLS_AthenaVocabularyCSVs')]",
+                "[concat(variables('factoryId'), '/datasets/Synapse_DW')]",
+                "[concat(variables('factoryId'), '/linkedServices/SynapseDedicatedSQLPool')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/01-Initialize Database')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Create database tables:\n - Synthea staging tables\n - OMOP CDM tables",
+                "activities": [
+                    {
+                        "name": "Get ETL Script Files",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "ADLS_ETLScripts",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "SourceContainer": "@pipeline().parameters.SourceContainer",
+                                    "SourceDirectory": "@pipeline().parameters.SourceDirectory",
+                                    "SourceFile": "/"
+                                }
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "recursive": true
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "For Each ETL Script",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get ETL Script Files",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get ETL Script Files').output.childItems",
+                                "type": "Expression"
+                            },
+                            "batchCount": 1,
+                            "activities": [
+                                {
+                                    "name": "Get ETL Script Content",
+                                    "description": "Retrieve the content of the SQL script",
+                                    "type": "Lookup",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Script",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "DelimitedTextSource",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSReadSettings",
+                                                "recursive": true,
+                                                "enablePartitionDiscovery": false
+                                            },
+                                            "formatSettings": {
+                                                "type": "DelimitedTextReadSettings"
+                                            }
+                                        },
+                                        "dataset": {
+                                            "referenceName": "ADLS_ETLScripts",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "SourceContainer": {
+                                                    "value": "@pipeline().parameters.SourceContainer",
+                                                    "type": "Expression"
+                                                },
+                                                "SourceDirectory": {
+                                                    "value": "@pipeline().parameters.SourceDirectory",
+                                                    "type": "Expression"
+                                                },
+                                                "SourceFile": {
+                                                    "value": "@item().name",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Execute ETL Script",
+                                    "type": "SqlServerStoredProcedure",
+                                    "dependsOn": [
+                                        {
+                                            "activity": "Get ETL Script Content",
+                                            "dependencyConditions": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    ],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Script",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "storedProcedureName": "sp_executesql",
+                                        "storedProcedureParameters": {
+                                            "stmt": {
+                                                "value": {
+                                                    "value": "@replace(replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']')),'[vocab]',concat('[',pipeline().parameters.VocabSchemaName,']'))",
+                                                    "type": "Expression"
+                                                },
+                                                "type": "String"
+                                            }
+                                        }
+                                    },
+                                    "linkedServiceName": {
+                                        "referenceName": "SynapseDedicatedSQLPool",
+                                        "type": "LinkedServiceReference"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string",
+                        "defaultValue": "synthea-omop"
+                    },
+                    "SourceDirectory": {
+                        "type": "string",
+                        "defaultValue": "ETL Scripts/Initialize"
+                    },
+                    "SyntheaSchemaName": {
+                        "type": "string",
+                        "defaultValue": "synthea"
+                    },
+                    "OMOPSchemaName": {
+                        "type": "string",
+                        "defaultValue": "omop"
+                    },
+                    "VocabSchemaName": {
+                        "type": "string",
+                        "defaultValue": "vocab"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-05-16T05:58:20Z"
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/datasets/ADLS_ETLScripts')]",
+                "[concat(variables('factoryId'), '/linkedServices/SynapseDedicatedSQLPool')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/02-Stage Synthea CSV files to Synapse Tables')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Copy Synthea CSV files to corresponding staging tables in the Synapse Dedicated SQL Pool",
+                "activities": [
+                    {
+                        "name": "Get CSV Files",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "ADLS_SyntheaCSVs",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "fileName": "/",
+                                    "SourceContainer": "@pipeline().parameters.SourceContainer",
+                                    "SourceDirectory": "@pipeline().parameters.SourceDirectory"
+                                }
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "recursive": true
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "For Each CSV File",
+                        "description": "For each CSV file, check if a corresponding table exists in the destination database and, if so, load the data file into the destination table.",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get CSV Files",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get CSV Files').output.childItems",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "Check Whether Destination Table Exists",
+                                    "type": "IfCondition",
+                                    "dependsOn": [
+                                        {
+                                            "activity": "Lookup Sink Table",
+                                            "dependencyConditions": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    ],
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "expression": {
+                                            "value": "@equals(activity('Lookup Sink Table').output.firstRow.TableExists,1)",
+                                            "type": "Expression"
+                                        },
+                                        "ifTrueActivities": [
+                                            {
+                                                "name": "Copy Data File to Corresponding Sink Table",
+                                                "description": "Copy data file to the corresponding destination table. It is assumed that the data file and the table share a common schema.",
+                                                "type": "Copy",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "timeout": "7.00:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [
+                                                    {
+                                                        "name": "Entity",
+                                                        "value": "@item().name"
+                                                    }
+                                                ],
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "DelimitedTextSource",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSReadSettings",
+                                                            "recursive": true
+                                                        },
+                                                        "formatSettings": {
+                                                            "type": "DelimitedTextReadSettings"
+                                                        }
+                                                    },
+                                                    "sink": {
+                                                        "type": "SqlDWSink",
+                                                        "preCopyScript": {
+                                                            "value": "@{concat('TRUNCATE TABLE [', pipeline().parameters.SinkSchemaName, '].[', replace(item().name,'.csv',''), ']')}",
+                                                            "type": "Expression"
+                                                        },
+                                                        "allowCopyCommand": true,
+                                                        "copyCommandSettings": {},
+                                                        "disableMetricsCollection": false
+                                                    },
+                                                    "enableStaging": false
+                                                },
+                                                "inputs": [
+                                                    {
+                                                        "referenceName": "ADLS_SyntheaCSVs",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "fileName": {
+                                                                "value": "@item().name",
+                                                                "type": "Expression"
+                                                            },
+                                                            "SourceContainer": {
+                                                                "value": "@pipeline().parameters.SourceContainer",
+                                                                "type": "Expression"
+                                                            },
+                                                            "SourceDirectory": {
+                                                                "value": "@pipeline().parameters.SourceDirectory",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                                "outputs": [
+                                                    {
+                                                        "referenceName": "Synapse_DW",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "sinkTableName": {
+                                                                "value": "@replace(item().name,'.csv','')",
+                                                                "type": "Expression"
+                                                            },
+                                                            "sinkSchemaName": {
+                                                                "value": "@pipeline().parameters.SinkSchemaName",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "Lookup Sink Table",
+                                    "description": "Lookup whether a destination table that matches the name of the source file exists.",
+                                    "type": "Lookup",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Entity",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "SqlDWSource",
+                                            "sqlReaderQuery": {
+                                                "value": "@concat('SELECT COUNT(*) AS TableExists\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = ''',pipeline().parameters.SinkSchemaName, '''\n\tAND TABLE_NAME = ''',replace(item().name,'.csv',''),'''')\n",
+                                                "type": "Expression"
+                                            },
+                                            "queryTimeout": "02:00:00",
+                                            "partitionOption": "None"
+                                        },
+                                        "dataset": {
+                                            "referenceName": "Synapse_DW",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "sinkTableName": "INFORMATION_SCHEMA",
+                                                "sinkSchemaName": "TABLES"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string",
+                        "defaultValue": "synthea-omop"
+                    },
+                    "SourceDirectory": {
+                        "type": "string",
+                        "defaultValue": "SyntheticMass/COVID100k"
+                    },
+                    "SinkSchemaName": {
+                        "type": "string",
+                        "defaultValue": "synthea"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-05-16T01:07:33Z"
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/datasets/ADLS_SyntheaCSVs')]",
+                "[concat(variables('factoryId'), '/datasets/Synapse_DW')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/04-Transform Data and Load CDM Tables')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Transform Synthea data in staging tables and load CDM tables in OMOP-compatible format.",
+                "activities": [
+                    {
+                        "name": "Get ETL Script Files",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "ADLS_ETLScripts",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "SourceContainer": "@pipeline().parameters.SourceContainer",
+                                    "SourceDirectory": "@pipeline().parameters.SourceDirectory",
+                                    "SourceFile": "/"
+                                }
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "recursive": true
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "For Each ETL Script",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get ETL Script Files",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get ETL Script Files').output.childItems",
+                                "type": "Expression"
+                            },
+                            "batchCount": 1,
+                            "activities": [
+                                {
+                                    "name": "Get ETL Script Content",
+                                    "description": "Retrieve the content of the SQL script",
+                                    "type": "Lookup",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Script",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "DelimitedTextSource",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSReadSettings",
+                                                "recursive": true,
+                                                "enablePartitionDiscovery": false
+                                            },
+                                            "formatSettings": {
+                                                "type": "DelimitedTextReadSettings"
+                                            }
+                                        },
+                                        "dataset": {
+                                            "referenceName": "ADLS_ETLScripts",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "SourceContainer": {
+                                                    "value": "@pipeline().parameters.SourceContainer",
+                                                    "type": "Expression"
+                                                },
+                                                "SourceDirectory": {
+                                                    "value": "@pipeline().parameters.SourceDirectory",
+                                                    "type": "Expression"
+                                                },
+                                                "SourceFile": {
+                                                    "value": "@item().name",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Execute ETL Script",
+                                    "type": "SqlServerStoredProcedure",
+                                    "dependsOn": [
+                                        {
+                                            "activity": "Get ETL Script Content",
+                                            "dependencyConditions": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    ],
+                                    "policy": {
+                                        "timeout": "7.00:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [
+                                        {
+                                            "name": "Script",
+                                            "value": "@item().name"
+                                        }
+                                    ],
+                                    "typeProperties": {
+                                        "storedProcedureName": "sp_executesql",
+                                        "storedProcedureParameters": {
+                                            "stmt": {
+                                                "value": {
+                                                    "value": "@replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']'))",
+                                                    "type": "Expression"
+                                                },
+                                                "type": "String"
+                                            }
+                                        }
+                                    },
+                                    "linkedServiceName": {
+                                        "referenceName": "SynapseDedicatedSQLPool",
+                                        "type": "LinkedServiceReference"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string",
+                        "defaultValue": "synthea-omop"
+                    },
+                    "SourceDirectory": {
+                        "type": "string",
+                        "defaultValue": "ETL Scripts/Load"
+                    },
+                    "SyntheaSchemaName": {
+                        "type": "string",
+                        "defaultValue": "synthea"
+                    },
+                    "OMOPSchemaName": {
+                        "type": "string",
+                        "defaultValue": "omop"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-05-16T01:07:33Z"
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/datasets/ADLS_ETLScripts')]",
+                "[concat(variables('factoryId'), '/linkedServices/SynapseDedicatedSQLPool')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryName'), '/00-Execute Synthea-OMOP ETL')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Execute the entire ETL Process",
+                "activities": [
+                    {
+                        "name": "01-Initialize Database",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "01-Initialize Database",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "SourceContainer": {
+                                    "value": "@pipeline().parameters.SourceContainer",
+                                    "type": "Expression"
+                                },
+                                "SourceDirectory": {
+                                    "value": "@pipeline().parameters.SourceDirectoryInitialize",
+                                    "type": "Expression"
+                                },
+                                "SyntheaSchemaName": {
+                                    "value": "@pipeline().parameters.SyntheaSchemaName",
+                                    "type": "Expression"
+                                },
+                                "OMOPSchemaName": {
+                                    "value": "@pipeline().parameters.OMOPSchemaName",
+                                    "type": "Expression"
+                                },
+                                "VocabSchemaName": {
+                                    "value": "@pipeline().parameters.VocabSchemaName",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "02-Stage Synthea CSV files to Synapse Tables",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [
+                            {
+                                "activity": "01-Initialize Database",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "02-Stage Synthea CSV files to Synapse Tables",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "SourceContainer": {
+                                    "value": "@pipeline().parameters.SourceContainer",
+                                    "type": "Expression"
+                                },
+                                "SourceDirectory": {
+                                    "value": "@pipeline().parameters.SourceDirectorySynthea",
+                                    "type": "Expression"
+                                },
+                                "SinkSchemaName": {
+                                    "value": "@pipeline().parameters.SyntheaSchemaName",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "03-Stage Vocabulary Data to Synapse Tables",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [
+                            {
+                                "activity": "01-Initialize Database",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "03-Stage Vocabulary Data to Synapse Tables",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "SourceContainer": {
+                                    "value": "@pipeline().parameters.SourceContainer",
+                                    "type": "Expression"
+                                },
+                                "SourceDirectory": {
+                                    "value": "@pipeline().parameters.SourceDirectoryVocabulary",
+                                    "type": "Expression"
+                                },
+                                "SinkSchemaName": {
+                                    "value": "@pipeline().parameters.OMOPSchemaName",
+                                    "type": "Expression"
+                                },
+                                "StagingSchemaName": {
+                                    "value": "@pipeline().parameters.VocabSchemaName",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "04-Transform Data and Load CDM Tables",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [
+                            {
+                                "activity": "02-Stage Synthea CSV files to Synapse Tables",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "03-Stage Vocabulary Data to Synapse Tables",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "04-Transform Data and Load CDM Tables",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "SourceContainer": {
+                                    "value": "@pipeline().parameters.SourceContainer",
+                                    "type": "Expression"
+                                },
+                                "SourceDirectory": {
+                                    "value": "@pipeline().parameters.SourceDirectoryLoad",
+                                    "type": "Expression"
+                                },
+                                "SyntheaSchemaName": {
+                                    "value": "@pipeline().parameters.SyntheaSchemaName",
+                                    "type": "Expression"
+                                },
+                                "OMOPSchemaName": {
+                                    "value": "@pipeline().parameters.OMOPSchemaName",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "parameters": {
+                    "SourceContainer": {
+                        "type": "string",
+                        "defaultValue": "synthea-omop"
+                    },
+                    "SourceDirectoryInitialize": {
+                        "type": "string",
+                        "defaultValue": "ETL Scripts/Initialize"
+                    },
+                    "SyntheaSchemaName": {
+                        "type": "string",
+                        "defaultValue": "synthea"
+                    },
+                    "OMOPSchemaName": {
+                        "type": "string",
+                        "defaultValue": "omop"
+                    },
+                    "SourceDirectorySynthea": {
+                        "type": "string",
+                        "defaultValue": "SyntheticMass/COVID100k"
+                    },
+                    "SourceDirectoryVocabulary": {
+                        "type": "string",
+                        "defaultValue": "Vocab SNOMED_LOINC_CVX_RXNORM"
+                    },
+                    "SourceDirectoryLoad": {
+                        "type": "string",
+                        "defaultValue": "ETL Scripts/Load"
+                    },
+                    "VocabSchemaName": {
+                        "type": "string",
+                        "defaultValue": "vocab"
+                    }
+                },
+                "folder": {
+                    "name": "Synthea-OMOP ETL"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-05-16T06:03:29Z"
+            },
+            "dependsOn": [
+                "[variables('factoryId')]",
+                "[concat(variables('factoryId'), '/pipelines/01-Initialize Database')]",
+                "[concat(variables('factoryId'), '/pipelines/02-Stage Synthea CSV files to Synapse Tables')]",
+                "[concat(variables('factoryId'), '/pipelines/03-Stage Vocabulary Data to Synapse Tables')]",
+                "[concat(variables('factoryId'), '/pipelines/04-Transform Data and Load CDM Tables')]"
+            ]
+        }
+    ]
+}

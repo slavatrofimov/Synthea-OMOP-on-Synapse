@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "companyTla": {
+            "value": "GEN-UNIQUE-3"
+        },
+        "ADLS_accountKey": {
+            "value": ""
+        },
+        "deploymentType": {
+            "value": "poc"
+        },
+        "SynapseDedicatedSQLPool_connectionString": {
+            "value": "Source=mySynapseSQLPool.sql.azuresynapse.net;Initial Catalog=myDatabaseName;User ID=mySQLAdminUserName;Password=myPassword;"
+        },
+        "ADLS_url": {
+            "value": "https://<ADLS Account Name>.dfs.core.windows.net"
+        }
+    }
+}
