@@ -100,12 +100,13 @@ You will also need a set of synthetic healthcare records in CSV format (generate
 ### 2 Provision Azure resources
 We will use two pre-built Azure Resource Manager (ARM) templates to provision resources to your Azure subscription.
 
-#### Provision Data Lake, Synapse Workspace and Dedicated SQL Pool
+#### 2.1 Provision Data Lake, Synapse Workspace and Dedicated SQL Pool
 Let's start by provisioning an Azure Storage Account (which will serve as our data lake) as well as an Azure Synapse Analytics Workspace with a Dedicated SQL Pool (which will serve as our data warehouse).
 
 >Note, if you already have a storage account (Data Lake) and a Synapse Analytics Workpsace with a Dedicated SQL Pool, feel free to skip this deployment and use your existing resources. 
 
-Click on the "Deploy to Azure" button below to initiate the deployment.  
+Click on the "Deploy to Azure" button below to initiate the deployment. 
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fsynapse_workspace.json)
 
 If necessary, sign into the Azure Portal and provide information requested by the template, as illustrated below:
@@ -122,7 +123,7 @@ If necessary, sign into the Azure Portal and provide information requested by th
 * **Sku**: select the size of your dedicated SQL pool from the drop-down list. We recommend DW200c for this POC.
 
 
-#### Provision Azure Data Factory and Pipelines
+#### 2.2 Provision Azure Data Factory and Pipelines
 Then, let's continue by deploying an Azure Data Factory with the necessary pipelines that will be used to orchestrate the data transformation and loading activities. Click on the "Deploy to Azure" button below to initiate the deployment.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fdata_factory.json)
