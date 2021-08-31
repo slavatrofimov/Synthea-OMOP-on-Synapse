@@ -25,6 +25,10 @@ The purpose of this project is to **accelerate healthcare analytics by demonstra
 
 **[Azure Synapse Analytics](https://docs.microsoft.com/en-us/azure/synapse-analytics/overview-what-is)** is a massively scalable, cloud-based analytics platform that brings together enterprise data warehousing, data engineering and Big Data analytics.
 
+**[Azure Data Factory](https://docs.microsoft.com/en-us/azure/data-factory/introduction)** is a cloud-based data integration service that allows you to create data-driven workflows for orchestrating data movement and transformation at scale.
+
+**[Azure Data Lake Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction)** is a cloud-based storage platform that serves as the foundation for building enterprise data lakes.
+
 ## Solution Architecture <a name="architecture"></a>
 
 The solution leverages several resources in Microsoft Azure:
@@ -68,7 +72,7 @@ Please unzip the repository after downloading it to your local computer.
 
 #### 1.3 Standardized vocabulary data
 
-You will need a set of CSV files with standardize vocabularies downloaded from the Athena OHDSI Vocabularies Repository. Please register for a free account at <https://athena.ohdsi.org/>. Then, navigate to the [Download](https://athena.ohdsi.org/vocabulary/list) page and select the following vocabulary types:
+You will need a set of CSV files with standardized vocabularies downloaded from the Athena OHDSI Vocabularies Repository. Please register for a free account at <https://athena.ohdsi.org/>. Then, navigate to the [Download](https://athena.ohdsi.org/vocabulary/list) page and select the following vocabulary types:
 
 * **SNOMED** Systematic Nomenclature of Medicine - Clinical Terms (IHTSDO)
 * **LOINC** Logical Observation Identifiers Names and Codes (Regenstrief Institute)
@@ -227,10 +231,10 @@ Let's track the progress of the pipeline execution and ensure that it completes 
 > Data factory pipeline may take a while to run, depending on the volume of your data and the scale of the dedidcated SQL pool you had provisioned.
 
 ### 5 Query data in the OMOP schema of the Synapse Dedicated SQL Pool
+Coming soon.
 
-### 6 Querying data in the Dedicated SQL Pool
-
-### 7 Visualize healthcare data in Power BI
+### 6 Visualize healthcare data in Power BI
+Coming soon.
 
 ## Contributors <a name="contributors"></a>
 * Austin Walsh
