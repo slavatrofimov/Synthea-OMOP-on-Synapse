@@ -21,6 +21,8 @@ The purpose of this project is to **accelerate healthcare analytics by demonstra
 
 **[Observation Medical Outcomes Partnership (OMOP) Common Data Model (CDM)](https://www.ohdsi.org/data-standardization/the-common-data-model/)** allows for the systematic analysis of disparate observational databases by transforming raw health data into a common format (data model) as well as a common representation (terminologies, vocabularies and coding schemes). OMOP is favored by healthcare researchers for its simplicity and accessibility.
 
+> This project is based on OMOP CDM version 5.3.1.
+
 **[Synthea<sup>TM</sup>](https://synthetichealth.github.io/synthea/)** is an open-source Synthetic Patient Population Simulator that outputs realistic, but not real, patient data and associated health records in a variety of formats. The syntheic healthcare data, are free from cost, privacy, and security restrictions, enabling research  that would be legally or practically unfeasible. While Synthea supports multiple output formats, OMOP is not one of them.
 
 **[Azure Synapse Analytics](https://docs.microsoft.com/en-us/azure/synapse-analytics/overview-what-is)** is a massively scalable, cloud-based analytics platform that brings together enterprise data warehousing, data engineering and Big Data analytics.
@@ -212,6 +214,7 @@ Now, let's make sure that the parameters of your data factory pipeline are confi
 * **SourceDirectoryVocabulary**: path to the directory in the data lake container that stores raw vocabulary data in CSV format.
 * **SourceDirectoryLoad**: path to the directory in the data lake container that contains SQL scripts used for data transformation and loading.
 * **VocabSchemaName**: name of the database schema that will be used to stage raw vocabulary data.
+* **HelperSchemaName**: name of the database schema that will be used to store auxiliary objects that facilitate the transformation of data.
 
 #### 4.3 Execute the data factory pipeline
 As part of this tutorial, we will execute the data-factory pipeline once. Start by navigating to the "Author" hub of the pipeline you had provisioned, select the pipeline labeled **00-Execute Synthea-OMOP ETL**, click on the "Add trigger" button and select "Trigger now" as illustrated below:

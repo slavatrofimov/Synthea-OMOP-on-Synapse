@@ -72,16 +72,16 @@ FROM
            CAST(NULL AS VARCHAR) route_source_value,
            CAST(NULL AS VARCHAR) dose_unit_source_value
     FROM [synthea].medications m
-        JOIN [omop].source_to_standard_vocab_map srctostdvm
+        JOIN [helper].source_to_standard_vocab_map srctostdvm
             ON srctostdvm.SOURCE_CODE = m.code
                AND srctostdvm.TARGET_DOMAIN_ID = 'Drug'
                AND srctostdvm.TARGET_VOCABULARY_ID = 'RxNorm'
                AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
                AND srctostdvm.TARGET_INVALID_REASON IS NULL
-        JOIN [omop].source_to_source_vocab_map srctosrcvm
+        JOIN [helper].source_to_source_vocab_map srctosrcvm
             ON srctosrcvm.SOURCE_CODE = m.code
                AND srctosrcvm.SOURCE_VOCABULARY_ID = 'RxNorm'
-        LEFT JOIN [omop].FINAL_VISIT_IDS fv
+        LEFT JOIN [helper].FINAL_VISIT_IDS fv
             ON fv.encounter_id = m.encounter
         JOIN [omop].PERSON p
             ON p.PERSON_SOURCE_VALUE = m.patient
@@ -109,16 +109,16 @@ FROM
            CAST(NULL AS VARCHAR) route_source_value,
            CAST(NULL AS VARCHAR) dose_unit_source_value
     FROM [synthea].immunizations i
-        JOIN [omop].source_to_standard_vocab_map srctostdvm
+        JOIN [helper].source_to_standard_vocab_map srctostdvm
             ON srctostdvm.SOURCE_CODE = i.code
                AND srctostdvm.TARGET_DOMAIN_ID = 'Drug'
                AND srctostdvm.TARGET_VOCABULARY_ID = 'CVX'
                AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
                AND srctostdvm.TARGET_INVALID_REASON IS NULL
-        JOIN [omop].source_to_source_vocab_map srctosrcvm
+        JOIN [helper].source_to_source_vocab_map srctosrcvm
             ON srctosrcvm.SOURCE_CODE = i.code
                AND srctosrcvm.SOURCE_VOCABULARY_ID = 'CVX'
-        LEFT JOIN [omop].FINAL_VISIT_IDS fv
+        LEFT JOIN [helper].FINAL_VISIT_IDS fv
             ON fv.encounter_id = i.encounter
         JOIN [omop].PERSON p
             ON p.PERSON_SOURCE_VALUE = i.patient

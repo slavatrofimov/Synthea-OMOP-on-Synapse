@@ -32,17 +32,17 @@ SELECT ROW_NUMBER() OVER (ORDER BY PERSON_ID) device_exposure_id,
        d.code device_source_value,
        srctosrcvm.SOURCE_CONCEPT_ID device_source_concept_id
 FROM [synthea].devices d
-    JOIN [omop].source_to_standard_vocab_map srctostdvm
+    JOIN [helper].source_to_standard_vocab_map srctostdvm
         ON srctostdvm.SOURCE_CODE = d.code
            AND srctostdvm.TARGET_DOMAIN_ID = 'Device'
            AND srctostdvm.TARGET_VOCABULARY_ID = 'SNOMED'
            AND srctostdvm.SOURCE_VOCABULARY_ID = 'SNOMED'
            AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
            AND srctostdvm.TARGET_INVALID_REASON IS NULL
-    JOIN [omop].source_to_source_vocab_map srctosrcvm
+    JOIN [helper].source_to_source_vocab_map srctosrcvm
         ON srctosrcvm.SOURCE_CODE = d.code
            AND srctosrcvm.SOURCE_VOCABULARY_ID = 'SNOMED'
-    LEFT JOIN [omop].FINAL_VISIT_IDS fv
+    LEFT JOIN [helper].FINAL_VISIT_IDS fv
         ON fv.encounter_id = d.encounter
     JOIN [omop].PERSON p
         ON p.PERSON_SOURCE_VALUE = d.patient;

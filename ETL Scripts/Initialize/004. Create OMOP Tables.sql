@@ -406,8 +406,8 @@ WITH (DISTRIBUTION = ROUND_ROBIN);
 			concept_class_id varchar(20) NOT NULL,
 			standard_concept varchar(1) NULL,
 			concept_code varchar(50) NOT NULL,
-			valid_start_date date NOT NULL,
-			valid_end_date date NOT NULL,
+			valid_start_date varchar(20) NOT NULL,
+			valid_end_date varchar(20) NOT NULL,
 			invalid_reason varchar(1) NULL )
 WITH (DISTRIBUTION = ROUND_ROBIN);
 
@@ -435,8 +435,8 @@ WITH (DISTRIBUTION = ROUND_ROBIN);
  IF XACT_STATE() = 1 COMMIT; CREATE TABLE  [omop].CONCEPT_RELATIONSHIP  (concept_id_1 integer NOT NULL,
 			concept_id_2 integer NOT NULL,
 			relationship_id varchar(20) NOT NULL,
-			valid_start_date date NOT NULL,
-			valid_end_date date NOT NULL,
+			valid_start_date varchar(20) NOT NULL,
+			valid_end_date varchar(20) NOT NULL,
 			invalid_reason varchar(1) NULL )
 WITH (DISTRIBUTION = ROUND_ROBIN);
 
@@ -469,8 +469,8 @@ WITH (DISTRIBUTION = ROUND_ROBIN);
 			source_code_description varchar(255) NULL,
 			target_concept_id integer NOT NULL,
 			target_vocabulary_id varchar(20) NOT NULL,
-			valid_start_date date NOT NULL,
-			valid_end_date date NOT NULL,
+			valid_start_date varchar(20) NOT NULL,
+			valid_end_date varchar(20) NOT NULL,
 			invalid_reason varchar(1) NULL )
 WITH (DISTRIBUTION = ROUND_ROBIN);
 
@@ -484,8 +484,8 @@ WITH (DISTRIBUTION = ROUND_ROBIN);
 			denominator_value float NULL,
 			denominator_unit_concept_id integer NULL,
 			box_size integer NULL,
-			valid_start_date date NOT NULL,
-			valid_end_date date NOT NULL,
+			valid_start_date varchar(20) NOT NULL,
+			valid_end_date varchar(20) NOT NULL,
 			invalid_reason varchar(1) NULL )
 WITH (DISTRIBUTION = ROUND_ROBIN);
 

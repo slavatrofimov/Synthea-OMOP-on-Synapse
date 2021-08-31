@@ -541,7 +541,7 @@
                     },
                     "StagingSchemaName": {
                         "type": "string",
-                        "defaultValue": "vocab"
+                        "defaultValue": "omop"
                     }
                 },
                 "folder": {
@@ -696,7 +696,7 @@
                                         "storedProcedureParameters": {
                                             "stmt": {
                                                 "value": {
-                                                    "value": "@replace(replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']')),'[vocab]',concat('[',pipeline().parameters.VocabSchemaName,']'))",
+                                                    "value": "@replace(replace(replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']')),'[vocab]',concat('[',pipeline().parameters.VocabSchemaName,']')),'[helper]',concat('[',pipeline().parameters.HelperSchemaName,']'))",
                                                     "type": "Expression"
                                                 },
                                                 "type": "String"
@@ -731,7 +731,11 @@
                     },
                     "VocabSchemaName": {
                         "type": "string",
-                        "defaultValue": "vocab"
+                        "defaultValue": "omop"
+                    },
+                    "HelperSchemaName": {
+                        "type": "string",
+                        "defaultValue": "helper"
                     }
                 },
                 "folder": {
@@ -954,7 +958,7 @@
                     },
                     "SourceDirectory": {
                         "type": "string",
-                        "defaultValue": "SyntheticMass/COVID100k"
+                        "defaultValue": "Synthea Source/COVID-19 100K"
                     },
                     "SinkSchemaName": {
                         "type": "string",
@@ -1112,7 +1116,7 @@
                                         "storedProcedureParameters": {
                                             "stmt": {
                                                 "value": {
-                                                    "value": "@replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']'))",
+                                                    "value": "@replace(replace(replace(activity('Get ETL Script Content').output.firstRow.Prop_0,'[synthea]',concat('[',pipeline().parameters.SyntheaSchemaName,']')),'[omop]',concat('[',pipeline().parameters.OMOPSchemaName,']')),'[helper]',concat('[',pipeline().parameters.HelperSchemaName,']'))",
                                                     "type": "Expression"
                                                 },
                                                 "type": "String"
@@ -1144,6 +1148,10 @@
                     "OMOPSchemaName": {
                         "type": "string",
                         "defaultValue": "omop"
+                    },
+                    "HelperSchemaName": {
+                        "type": "string",
+                        "defaultValue": "helper"
                     }
                 },
                 "folder": {
@@ -1195,6 +1203,10 @@
                                 },
                                 "VocabSchemaName": {
                                     "value": "@pipeline().parameters.VocabSchemaName",
+                                    "type": "Expression"
+                                },
+                                "HelperSchemaName": {
+                                    "value": "@pipeline().parameters.HelperSchemaName",
                                     "type": "Expression"
                                 }
                             }
@@ -1312,6 +1324,10 @@
                                 "OMOPSchemaName": {
                                     "value": "@pipeline().parameters.OMOPSchemaName",
                                     "type": "Expression"
+                                },
+                                "HelperSchemaName": {
+                                    "value": "@pipeline().parameters.HelperSchemaName",
+                                    "type": "Expression"
                                 }
                             }
                         }
@@ -1336,7 +1352,7 @@
                     },
                     "SourceDirectorySynthea": {
                         "type": "string",
-                        "defaultValue": "SyntheticMass/COVID100k"
+                        "defaultValue": "Synthea Source/COVID-19 100K"
                     },
                     "SourceDirectoryVocabulary": {
                         "type": "string",
@@ -1348,7 +1364,11 @@
                     },
                     "VocabSchemaName": {
                         "type": "string",
-                        "defaultValue": "vocab"
+                        "defaultValue": "omop"
+                    },
+                    "HelperSchemaName": {
+                        "type": "string",
+                        "defaultValue": "helper"
                     }
                 },
                 "folder": {

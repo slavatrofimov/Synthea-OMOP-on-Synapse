@@ -50,10 +50,10 @@ SELECT av.visit_occurrence_id,
        0,
        NULL,
        lag(av.visit_occurrence_id) OVER (partition BY p.person_id ORDER BY av.visit_start_date)
-FROM [omop].all_visits av
+FROM [helper].all_visits av
     JOIN [omop].person p
         ON av.patient = p.person_source_value
 WHERE av.visit_occurrence_id IN
       (
-          SELECT DISTINCT VISIT_OCCURRENCE_ID_NEW FROM [omop].FINAL_VISIT_IDS
+          SELECT DISTINCT VISIT_OCCURRENCE_ID_NEW FROM [helper].FINAL_VISIT_IDS
       );

@@ -26,7 +26,7 @@ SELECT p.PERSON_ID person_id,
        e.reasoncode cause_source_value,
        srctostdvm.SOURCE_CONCEPT_ID cause_source_concept_id
 FROM [synthea].encounters e
-    JOIN [omop].source_to_standard_vocab_map srctostdvm
+    JOIN [helper].source_to_standard_vocab_map srctostdvm
         ON srctostdvm.SOURCE_CODE = e.reasoncode
            AND srctostdvm.TARGET_DOMAIN_ID = 'Condition'
            AND srctostdvm.SOURCE_DOMAIN_ID = 'Condition'

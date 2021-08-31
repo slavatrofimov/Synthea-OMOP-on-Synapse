@@ -62,10 +62,10 @@ SELECT av.visit_occurrence_id + 1000000 visit_detail_id,
        NULL discharge_to_source_value,
        NULL visit_detail_parent_id,
        av.visit_occurrence_id visit_occurrence_id
-FROM [omop].all_visits av
+FROM [helper].all_visits av
     JOIN [omop].person p
         ON av.patient = p.person_source_value
 WHERE av.visit_occurrence_id IN
       (
-          SELECT DISTINCT VISIT_OCCURRENCE_ID_NEW FROM [omop].FINAL_VISIT_IDS
+          SELECT DISTINCT VISIT_OCCURRENCE_ID_NEW FROM [helper].FINAL_VISIT_IDS
       );

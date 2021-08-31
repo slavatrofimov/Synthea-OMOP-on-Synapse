@@ -1,9 +1,9 @@
 --Use this code to map source codes to source concept ids;
-IF OBJECT_ID('[omop].source_to_source_vocab_map', 'U') IS NOT NULL
-    DROP TABLE [omop].source_to_source_vocab_map;
+IF OBJECT_ID('[helper].source_to_source_vocab_map', 'U') IS NOT NULL
+    DROP TABLE [helper].source_to_source_vocab_map;
 
 
-CREATE TABLE [omop].source_to_source_vocab_map
+CREATE TABLE [helper].source_to_source_vocab_map
 WITH (DISTRIBUTION=ROUND_ROBIN) AS WITH CTE_VOCAB_MAP
                                    AS (SELECT c.CONCEPT_CODE AS SOURCE_CODE,
                                               c.CONCEPT_ID AS SOURCE_CONCEPT_ID,
@@ -64,6 +64,6 @@ SELECT CTE_VOCAB_MAP.SOURCE_CODE,
 FROM CTE_VOCAB_MAP;
 
 CREATE INDEX idx_source_vocab_map_source_code
-ON [omop].source_to_source_vocab_map (SOURCE_CODE);
+ON [helper].source_to_source_vocab_map (SOURCE_CODE);
 CREATE INDEX idx_source_vocab_map_source_vocab_id
-ON [omop].source_to_source_vocab_map (SOURCE_VOCABULARY_ID);
+ON [helper].source_to_source_vocab_map (SOURCE_VOCABULARY_ID);

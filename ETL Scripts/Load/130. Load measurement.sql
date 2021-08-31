@@ -63,16 +63,16 @@ FROM
            CAST(NULL AS VARCHAR) unit_source_value,
            CAST(NULL AS VARCHAR) value_source_value
     FROM [synthea].procedures pr
-        JOIN [omop].source_to_standard_vocab_map srctostdvm
+        JOIN [helper].source_to_standard_vocab_map srctostdvm
             ON srctostdvm.SOURCE_CODE = pr.code
                AND srctostdvm.TARGET_DOMAIN_ID = 'Measurement'
                AND srctostdvm.SOURCE_VOCABULARY_ID = 'SNOMED'
                AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
                AND srctostdvm.TARGET_INVALID_REASON IS NULL
-        JOIN [omop].source_to_source_vocab_map srctosrcvm
+        JOIN [helper].source_to_source_vocab_map srctosrcvm
             ON srctosrcvm.SOURCE_CODE = pr.code
                AND srctosrcvm.SOURCE_VOCABULARY_ID = 'SNOMED'
-        LEFT JOIN [omop].FINAL_VISIT_IDS fv
+        LEFT JOIN [helper].FINAL_VISIT_IDS fv
             ON fv.encounter_id = pr.encounter
         JOIN [omop].PERSON p
             ON p.PERSON_SOURCE_VALUE = pr.patient
@@ -102,27 +102,27 @@ FROM
            o.units unit_source_value,
            o.value value_source_value
     FROM [synthea].observations o
-        JOIN [omop].source_to_standard_vocab_map srctostdvm
+        JOIN [helper].source_to_standard_vocab_map srctostdvm
             ON srctostdvm.SOURCE_CODE = o.code
                AND srctostdvm.TARGET_DOMAIN_ID = 'Measurement'
                AND srctostdvm.SOURCE_VOCABULARY_ID = 'LOINC'
                AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
                AND srctostdvm.TARGET_INVALID_REASON IS NULL
-        LEFT JOIN [omop].source_to_standard_vocab_map srcmap1
+        LEFT JOIN [helper].source_to_standard_vocab_map srcmap1
             ON srcmap1.SOURCE_CODE = o.units
                AND srcmap1.TARGET_VOCABULARY_ID = 'UCUM'
                AND srcmap1.SOURCE_VOCABULARY_ID = 'UCUM'
                AND srcmap1.TARGET_STANDARD_CONCEPT = 'S'
                AND srcmap1.TARGET_INVALID_REASON IS NULL
-        LEFT JOIN [omop].source_to_standard_vocab_map srcmap2
+        LEFT JOIN [helper].source_to_standard_vocab_map srcmap2
             ON srcmap2.SOURCE_CODE = o.value
                AND srcmap2.TARGET_DOMAIN_ID = 'Meas value'
                AND srcmap2.TARGET_STANDARD_CONCEPT = 'S'
                AND srcmap2.TARGET_INVALID_REASON IS NULL
-        LEFT JOIN [omop].source_to_source_vocab_map srctosrcvm
+        LEFT JOIN [helper].source_to_source_vocab_map srctosrcvm
             ON srctosrcvm.SOURCE_CODE = o.code
                AND srctosrcvm.SOURCE_VOCABULARY_ID = 'LOINC'
-        LEFT JOIN [omop].FINAL_VISIT_IDS fv
+        LEFT JOIN [helper].FINAL_VISIT_IDS fv
             ON fv.encounter_id = o.encounter
         JOIN [omop].PERSON p
             ON p.PERSON_SOURCE_VALUE = o.patient

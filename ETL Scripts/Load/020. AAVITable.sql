@@ -1,11 +1,11 @@
 /*Assign VISIT_OCCURRENCE_ID to all encounters*/
 
-IF OBJECT_ID('[omop].ASSIGN_ALL_VISIT_IDS', 'U') IS NOT NULL
+IF OBJECT_ID('[helper].ASSIGN_ALL_VISIT_IDS', 'U') IS NOT NULL
 BEGIN
-    DROP TABLE [omop].ASSIGN_ALL_VISIT_IDS;
+    DROP TABLE [helper].ASSIGN_ALL_VISIT_IDS;
 END;
 
-CREATE TABLE [omop].ASSIGN_ALL_VISIT_IDS
+CREATE TABLE [helper].ASSIGN_ALL_VISIT_IDS
 WITH (DISTRIBUTION=ROUND_ROBIN) AS SELECT E.id AS encounter_id,
                                           E.patient AS person_source_value,
                                           E.start AS date_service,
@@ -46,7 +46,7 @@ WITH (DISTRIBUTION=ROUND_ROBIN) AS SELECT E.id AS encounter_id,
                                                   NULL
                                           END AS VISIT_OCCURRENCE_ID_NEW
                                    FROM [synthea].encounters AS E
-                                       JOIN [omop].all_visits AS AV
+                                       JOIN [helper].all_visits AS AV
                                            ON E.patient = AV.patient
                                               AND E.start >= AV.VISIT_START_DATE
                                               AND E.start <= AV.VISIT_END_DATE;

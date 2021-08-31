@@ -1,13 +1,13 @@
-IF OBJECT_ID('[omop].IP_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].IP_VISITS;
-IF OBJECT_ID('[omop].ER_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].ER_VISITS;
-IF OBJECT_ID('[omop].OP_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].OP_VISITS;
-IF OBJECT_ID('[omop].ALL_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].ALL_VISITS;
+IF OBJECT_ID('[helper].IP_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].IP_VISITS;
+IF OBJECT_ID('[helper].ER_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].ER_VISITS;
+IF OBJECT_ID('[helper].OP_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].OP_VISITS;
+IF OBJECT_ID('[helper].ALL_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].ALL_VISITS;
 
-CREATE TABLE [omop].IP_VISITS
+CREATE TABLE [helper].IP_VISITS
 /* Inpatient visits */
 /* Collapse IP claim lines with <=1 day between them into one visit */
 WITH (DISTRIBUTION=ROUND_ROBIN) AS WITH CTE_END_DATES
@@ -84,7 +84,7 @@ FROM
              CTE_VISIT_ENDS.VISIT_END_DATE
 ) T2;
 
-CREATE TABLE [omop].ER_VISITS
+CREATE TABLE [helper].ER_VISITS
 /* Emergency visits */
 /* collapse ER claim lines with no days between them into one visit */
 WITH (DISTRIBUTION=ROUND_ROBIN) AS SELECT T2.encounter_id,
@@ -119,7 +119,7 @@ WITH (DISTRIBUTION=ROUND_ROBIN) AS SELECT T2.encounter_id,
                                    ) T2;
 
 /* Outpatient visits */
-CREATE TABLE [omop].OP_VISITS
+CREATE TABLE [helper].OP_VISITS
 WITH (DISTRIBUTION=ROUND_ROBIN) AS WITH CTE_VISITS_DISTINCT
                                    AS (SELECT MIN(id) AS encounter_id,
                                               patient,
@@ -142,7 +142,7 @@ GROUP BY patient,
          encounterclass,
          VISIT_START_DATE;
 
-CREATE TABLE [omop].all_visits
+CREATE TABLE [helper].all_visits
 WITH (DISTRIBUTION=ROUND_ROBIN)
 /* All visits */
 AS SELECT T1.encounter_id,
@@ -158,27 +158,27 @@ AS SELECT T1.encounter_id,
               encounterclass,
               IP_VISITS.VISIT_START_DATE,
               IP_VISITS.VISIT_END_DATE
-       FROM [omop].IP_VISITS
+       FROM [helper].IP_VISITS
        UNION ALL
        SELECT ER_VISITS.encounter_id,
               patient,
               encounterclass,
               VISIT_START_DATE,
               ER_VISITS.VISIT_END_DATE
-       FROM [omop].ER_VISITS
+       FROM [helper].ER_VISITS
        UNION ALL
        SELECT OP_VISITS.encounter_id,
               patient,
               encounterclass,
               VISIT_START_DATE,
               OP_VISITS.VISIT_END_DATE
-       FROM [omop].OP_VISITS
+       FROM [helper].OP_VISITS
    ) T1;
 
 --Remove unnecessary tables
-IF OBJECT_ID('[omop].IP_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].IP_VISITS;
-IF OBJECT_ID('[omop].ER_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].ER_VISITS;
-IF OBJECT_ID('[omop].OP_VISITS', 'U') IS NOT NULL
-    DROP TABLE [omop].OP_VISITS;
+IF OBJECT_ID('[helper].IP_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].IP_VISITS;
+IF OBJECT_ID('[helper].ER_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].ER_VISITS;
+IF OBJECT_ID('[helper].OP_VISITS', 'U') IS NOT NULL
+    DROP TABLE [helper].OP_VISITS;

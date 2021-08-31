@@ -16,7 +16,7 @@ SELECT 'Synthea synthetic health database',
        'OHDSI Community',
        'SyntheaTM is a Synthetic Patient Population Simulator. The goal is to output synthetic, realistic (but not real), patient data and associated health records in a variety of formats.',
        'https://synthetichealth.github.io/synthea/',
-       'https://github.com/OHDSI/ETL-Synthea',
+       'https://github.com/slavatrofimov/Synthea-OMOP-on-Synapse',
        GETDATE(), -- NB: Set this value to the day the source data was pulled
        GETDATE(),
        'v5.3',

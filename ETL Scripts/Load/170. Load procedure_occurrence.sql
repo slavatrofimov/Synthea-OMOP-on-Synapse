@@ -30,17 +30,17 @@ SELECT ROW_NUMBER() OVER (ORDER BY p.PERSON_ID) procedure_occurrence_id,
        srctosrcvm.SOURCE_CONCEPT_ID procedure_source_concept_id,
        NULL modifier_source_value
 FROM [synthea].procedures pr
-    JOIN [omop].source_to_standard_vocab_map srctostdvm
+    JOIN [helper].source_to_standard_vocab_map srctostdvm
         ON srctostdvm.SOURCE_CODE = pr.code
            AND srctostdvm.TARGET_DOMAIN_ID = 'Procedure'
            AND srctostdvm.TARGET_VOCABULARY_ID = 'SNOMED'
            AND srctostdvm.SOURCE_VOCABULARY_ID = 'SNOMED'
            AND srctostdvm.TARGET_STANDARD_CONCEPT = 'S'
            AND srctostdvm.TARGET_INVALID_REASON IS NULL
-    JOIN [omop].source_to_source_vocab_map srctosrcvm
+    JOIN [helper].source_to_source_vocab_map srctosrcvm
         ON srctosrcvm.SOURCE_CODE = pr.code
            AND srctosrcvm.SOURCE_VOCABULARY_ID = 'SNOMED'
-    LEFT JOIN [omop].FINAL_VISIT_IDS fv
+    LEFT JOIN [helper].FINAL_VISIT_IDS fv
         ON fv.encounter_id = pr.encounter
     JOIN [omop].PERSON p
         ON p.PERSON_SOURCE_VALUE = pr.patient;

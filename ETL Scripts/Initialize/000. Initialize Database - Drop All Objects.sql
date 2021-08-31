@@ -7,7 +7,7 @@ SET NOCOUNT ON;
 
 -- Set this to a value to only drop objects in specific schemas.
 DECLARE @OnlyInSchemas NVARCHAR(1000)
-SET @OnlyInSchemas = N'[synthea],[vocab],[omop]';
+SET @OnlyInSchemas = N'[synthea],[vocab],[omop],[helper]';
 SET @OnlyInSchemas = REPLACE(REPLACE(@OnlyInSchemas,'[', ''), ']', '')
 
 CREATE TABLE #Commands (
@@ -29,6 +29,7 @@ SELECT N'FS', N'DROP FUNCTION $S.$O;' UNION
 SELECT N'FT', N'DROP FUNCTION $S.$O;' UNION
 SELECT N'IF', N'DROP FUNCTION $S.$O;' UNION
 SELECT N'P', N'DROP PROCEDURE $S.$O;' UNION
+SELECT N'V', N'DROP VIEW $S.$O;' UNION
 SELECT N'SN', N'DROP SYNONYM $S.$O;' UNION
 SELECT N'SQ', N'DROP QUEUE $S.$O;' UNION
 SELECT N'TR', N'DROP TRIGGER $S.$O;' UNION
