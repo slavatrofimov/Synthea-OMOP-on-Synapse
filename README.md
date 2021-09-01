@@ -113,7 +113,7 @@ Let's start by provisioning an Azure Storage Account (which will serve as our da
 
 Click on the "Deploy to Azure" button below to initiate the deployment.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fsynapse_workspace.json){:target="_blank"}
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fsynapse_workspace.json)
 
 If necessary, sign into the Azure Portal and provide information requested by the template, as illustrated below:
 
@@ -133,7 +133,7 @@ If necessary, sign into the Azure Portal and provide information requested by th
 
 Then, let's continue by deploying an Azure Data Factory with the necessary pipelines that will be used to orchestrate the data transformation and loading activities. Click on the "Deploy to Azure" button below to initiate the deployment.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fdata_factory.json){:target="_blank"}
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fslavatrofimov%2FSynthea-OMOP-on-Synapse%2Fmain%2FARM%2Fdata_factory.json)
 
 Provide information requested by the template, as illustrated below:
 
