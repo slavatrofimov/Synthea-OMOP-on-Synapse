@@ -143,9 +143,12 @@ Provide information requested by the template, as illustrated below:
 * **Resource group**: Select a resource group to which you will deploy the new Azure resources (or create a new one).  We recommend deploying the data factory to the same resource group that you created or selected in the previous step.
 * **Region details**: will be pre-seleted based on the region of the resource group.
 * **Company Tla**: a three-letter acronym for your company that will serve as a prefix in the naming scheme of new Azure resources that will be provisioned.
-* **ADLS_url**: a URL of the data lake endpoint of your storage account. It will typically look like this: *<https://mydatalakename.dfs.core.windows.net/>*
-* **ADLS_account Key**: secret key of your ADLS account. It will typically look like this: *JVv0KQTOJw/tAP5zKKiIgcUkYfGlyW0PYGK6PdN1b9JpoMnyiTv7ksY1hpHIQiRKjHmILr0kWx23arKATy0NZA==*
-* **SynapseDedicatedSQLPool_connectionString**: connection string to the dedicated SQL pool you  provisioned in the previous step. It will typically look like this: *Source=mySynapseSQLPool.sql.azuresynapse.net;Initial Catalog=myDatabaseName;User ID=mySQLAdminUserName;Password=myPassword;*
+* **Adls Url**: a URL of the data lake endpoint of your storage account. It will typically look like this: *<https://mydatalakename.dfs.core.windows.net/>*
+* **ADLS Account Key**: secret key of your ADLS account. It will typically look like this: *JVv0KQTOJw/tAP5zKKiIgcUkYfGlyW0PYGK6PdN1b9JpoMnyiTv7ksY1hpHIQiRKjHmILr0kWx23arKATy0NZA==*
+* **Synapse Dedicated SQL Endpoint**: dedicated SQL endpoint for your Synapse Analytics workspace. It will typically look like **mySynapseSQLPool.sql.azuresynapse.net**
+* **Synapse Dedicated SQL Pool Name**: name of the Dedicated SQL Pool.
+* **Synapse SQL User Name**: username of the account accessing the dedicated SQL pool.
+* **Synapse SQL Password**: password of the account accessing the dedicated SQL pool.
 
 ### 3 Upload SQL scripts and raw data to the data lake
 
