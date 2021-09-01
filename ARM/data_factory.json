@@ -47,7 +47,6 @@
         },
         "SynapseSQLPassword": {
             "type": "secureString",
-            "defaultValue": "myPassword",
             "metadata": "Secure string for the password of the account with access to the Dedicated SQL Pool"
         }
     },
@@ -461,42 +460,6 @@
                                                         }
                                                     }
                                                 ]
-                                            },
-                                            {
-                                                "name": "Copy Data To Permanent Table",
-                                                "type": "SqlServerStoredProcedure",
-                                                "dependsOn": [
-                                                    {
-                                                        "activity": "Copy Data File to Corresponding Staging Table",
-                                                        "dependencyConditions": [
-                                                            "Succeeded"
-                                                        ]
-                                                    }
-                                                ],
-                                                "policy": {
-                                                    "timeout": "7.00:00:00",
-                                                    "retry": 0,
-                                                    "retryIntervalInSeconds": 30,
-                                                    "secureOutput": false,
-                                                    "secureInput": false
-                                                },
-                                                "userProperties": [],
-                                                "typeProperties": {
-                                                    "storedProcedureName": "sp_executesql",
-                                                    "storedProcedureParameters": {
-                                                        "stmt": {
-                                                            "value": {
-                                                                "value": "@concat('INSERT INTO [', pipeline().parameters.SinkSchemaName, '].[', replace(item().name,'.csv',''), '] SELECT * FROM [',pipeline().parameters.StagingSchemaName,'].[',replace(item().name,'.csv', ''),']')",
-                                                                "type": "Expression"
-                                                            },
-                                                            "type": "String"
-                                                        }
-                                                    }
-                                                },
-                                                "linkedServiceName": {
-                                                    "referenceName": "SynapseDedicatedSQLPool",
-                                                    "type": "LinkedServiceReference"
-                                                }
                                             }
                                         ]
                                     }
@@ -551,10 +514,6 @@
                     "SourceDirectory": {
                         "type": "string",
                         "defaultValue": "Vocab SNOMED_LOINC_CVX_RXNORM"
-                    },
-                    "SinkSchemaName": {
-                        "type": "string",
-                        "defaultValue": "omop"
                     },
                     "StagingSchemaName": {
                         "type": "string",
@@ -1288,10 +1247,6 @@
                                 },
                                 "SourceDirectory": {
                                     "value": "@pipeline().parameters.SourceDirectoryVocabulary",
-                                    "type": "Expression"
-                                },
-                                "SinkSchemaName": {
-                                    "value": "@pipeline().parameters.OMOPSchemaName",
                                     "type": "Expression"
                                 },
                                 "StagingSchemaName": {
