@@ -21,24 +21,41 @@
                 "description": "Specify deployment type: DevTest, POC, Prod, Shared. This will also be used in the naming convention."
             }
         },
-        "ADLS_url": {
+        "AdlsUrl": {
             "type": "string",
+            "defaultValue": "https://mystorageaccount.dfs.core.windows.net/",
             "metadata": "URL of the Azure Data Lake Storage Account. E.g., https://mystorageaccount.dfs.core.windows.net/'"
         },
-        "ADLS_accountKey": {
+        "AdlsAccountKey": {
             "type": "secureString",
             "metadata": "Secure string for 'accountKey' of 'ADLS'"
         },
-        "SynapseDedicatedSQLPool_connectionString": {
+        "SynapseDedicatedSQLEndpoint": {
+            "type": "string",
+            "defaultValue": "mySynapseSQLPool.sql.azuresynapse.net",
+            "metadata": "Dedicated SQL endpoint for the Synapse Analytics Workspace"
+        },
+        "SynapseDedicatedSQLPoolName": {
+            "type": "string",
+            "defaultValue": "mySQLPoolName",
+            "metadata": "Name of the Dedicated SQL Pool"
+        },
+        "SynapseSQLUserName": {
+            "type": "string",
+            "defaultValue": "myusername",
+            "metadata": "Username of the SQL account with access to the Dedicated SQL pool"
+        },
+        "SynapseSQLPassword": {
             "type": "secureString",
-            "defaultValue": "Source=mySynapseSQLPool.sql.azuresynapse.net;Initial Catalog=myDatabaseName;User ID=mySQLAdminUserName;Password=myPassword;",
-            "metadata": "Secure string for 'connectionString' of 'SynapseDedicatedSQLPool'"
+            "defaultValue": "myPassword",
+            "metadata": "Secure string for the password of the account with access to the Dedicated SQL Pool"
         }
     },
     "variables": {
         "factoryName": "[toLower(concat(parameters('companyTla'),parameters('deploymentType'), 'df1'))]",
         "factoryId": "[concat('Microsoft.DataFactory/factories/', variables('factoryName'))]",
-        "location": "[resourceGroup().location]"
+        "location": "[resourceGroup().location]",
+        "SynapseDedicatedSQLPool_connectionString": "[concat('Data Source=', parameters('SynapseDedicatedSQLEndpoint'), ';Initial Catalog=', parameters('SynapseDedicatedSQLPoolName'), ';User ID=' , parameters('SynapseSQLUserName'), ' ;Password=', parameters('SynapseSQLPassword'))]"      
         },
     "resources": [
         {
@@ -268,10 +285,10 @@
                 "annotations": [],
                 "type": "AzureBlobFS",
                 "typeProperties": {
-                    "url": "[parameters('ADLS_url')]",
+                    "url": "[parameters('AdlsUrl')]",
                     "accountKey": {
                         "type": "SecureString",
-                        "value": "[parameters('ADLS_accountKey')]"
+                        "value": "[parameters('AdlsAccountKey')]"
                     }
                 }
             },
@@ -287,7 +304,7 @@
                 "annotations": [],
                 "type": "AzureSqlDW",
                 "typeProperties": {
-                    "connectionString": "[parameters('SynapseDedicatedSQLPool_connectionString')]"
+                    "connectionString": "[variables('SynapseDedicatedSQLPool_connectionString')]"
                 }
             },
             "dependsOn": [
@@ -541,7 +558,7 @@
                     },
                     "StagingSchemaName": {
                         "type": "string",
-                        "defaultValue": "omop"
+                        "defaultValue": "vocab"
                     }
                 },
                 "folder": {
@@ -731,7 +748,7 @@
                     },
                     "VocabSchemaName": {
                         "type": "string",
-                        "defaultValue": "omop"
+                        "defaultValue": "vocab"
                     },
                     "HelperSchemaName": {
                         "type": "string",
@@ -1364,7 +1381,7 @@
                     },
                     "VocabSchemaName": {
                         "type": "string",
-                        "defaultValue": "omop"
+                        "defaultValue": "vocab"
                     },
                     "HelperSchemaName": {
                         "type": "string",

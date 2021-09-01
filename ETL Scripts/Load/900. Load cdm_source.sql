@@ -21,5 +21,5 @@ SELECT 'Synthea synthetic health database',
        GETDATE(),
        'v5.3',
        VOCABULARY_VERSION
-FROM [omop].VOCABULARY
+FROM [vocab].VOCABULARY
 WHERE VOCABULARY_ID = 'None';

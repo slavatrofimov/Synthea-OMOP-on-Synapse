@@ -21,7 +21,7 @@ WITH (DISTRIBUTION=ROUND_ROBIN) AS WITH CTE_VOCAB_MAP
                                               c.CONCEPT_CLASS_ID AS TARGET_CONCEPT_CLASS_ID,
                                               c.INVALID_REASON AS TARGET_INVALID_REASON,
                                               c.STANDARD_CONCEPT AS TARGET_STANDARD_CONCEPT
-                                       FROM [omop].CONCEPT c
+                                       FROM [vocab].CONCEPT c
                                        UNION
                                        SELECT SOURCE_CODE,
                                               SOURCE_CONCEPT_ID,
@@ -40,9 +40,9 @@ WITH (DISTRIBUTION=ROUND_ROBIN) AS WITH CTE_VOCAB_MAP
                                               c2.INVALID_REASON AS TARGET_INVALID_REASON,
                                               c2.STANDARD_CONCEPT AS TARGET_STANDARD_CONCEPT
                                        FROM [omop].SOURCE_TO_CONCEPT_MAP stcm
-                                           LEFT OUTER JOIN [omop].CONCEPT c1
+                                           LEFT OUTER JOIN [vocab].CONCEPT c1
                                                ON c1.CONCEPT_ID = stcm.SOURCE_CONCEPT_ID
-                                           LEFT OUTER JOIN [omop].CONCEPT c2
+                                           LEFT OUTER JOIN [vocab].CONCEPT c2
                                                ON c2.CONCEPT_ID = stcm.TARGET_CONCEPT_ID
                                        WHERE stcm.INVALID_REASON IS NULL)
 SELECT CTE_VOCAB_MAP.SOURCE_CODE,

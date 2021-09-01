@@ -5,17 +5,26 @@
         "companyTla": {
             "value": "GEN-UNIQUE-3"
         },
-        "ADLS_accountKey": {
+        "AdlsAccountKey": {
             "value": ""
         },
         "deploymentType": {
             "value": "poc"
         },
-        "SynapseDedicatedSQLPool_connectionString": {
-            "value": "Source=mySynapseSQLPool.sql.azuresynapse.net;Initial Catalog=myDatabaseName;User ID=mySQLAdminUserName;Password=myPassword;"
-        },
-        "ADLS_url": {
+        "AdlsUrl": {
             "value": "https://<ADLS Account Name>.dfs.core.windows.net"
+        },
+        "SynapseDedicatedSQLEndpoint": {
+            "value": "mySynapseSQLPool.sql.azuresynapse.net"
+        },
+        "SynapseDedicatedSQLPoolName": {
+            "value": "mySQLPoolName"
+        },
+        "SynapseSQLUserName": {
+            "value": "myusername"
+        },
+        "SynapseSQLPassword": {
+            "value": "myPassword"
         }
     }
 }

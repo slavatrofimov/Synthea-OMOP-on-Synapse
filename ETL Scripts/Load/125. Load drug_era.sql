@@ -39,9 +39,9 @@ WITH (DISTRIBUTION=ROUND_ROBIN) AS
                             ---Add 1 day to the drug_exposure_start_date since there is no end_date or INTERVAL for the days_supply
                             ) AS drug_exposure_end_date
             FROM [omop].DRUG_EXPOSURE d
-                JOIN [omop].CONCEPT_ANCESTOR ca
+                JOIN [vocab].CONCEPT_ANCESTOR ca
                     ON ca.DESCENDANT_CONCEPT_ID = d.DRUG_CONCEPT_ID
-                JOIN [omop].CONCEPT c
+                JOIN [vocab].CONCEPT c
                     ON ca.ANCESTOR_CONCEPT_ID = c.CONCEPT_ID
             WHERE c.VOCABULARY_ID = 'RxNorm'
                     AND c.CONCEPT_CLASS_ID = 'Ingredient'
