@@ -19,7 +19,7 @@ The purpose of this project is to **accelerate healthcare analytics by demonstra
 
 **[Observation Medical Outcomes Partnership (OMOP) Common Data Model (CDM)](https://www.ohdsi.org/data-standardization/the-common-data-model/)** allows for the systematic analysis of disparate observational databases by transforming raw health data into a common format (data model) as well as a common representation (terminologies, vocabularies and coding schemes). OMOP is favored by healthcare researchers for its simplicity and accessibility.
 
-> This project is based on OMOP CDM version 5.3.1.
+> This project is based on [OMOP CDM version 5.3.1](https://ohdsi.github.io/CommonDataModel/cdm531.html).
 
 **[Synthea<sup>TM</sup>](https://synthetichealth.github.io/synthea/)** is an open-source Synthetic Patient Population Simulator that outputs realistic, but not real, patient data and associated health records in a variety of formats. The syntheic healthcare data, are free from cost, privacy, and security restrictions, enabling research  that would be legally or practically unfeasible. While Synthea supports multiple output formats, OMOP is not one of them.
 
@@ -241,12 +241,41 @@ Let's track the progress of the pipeline execution and ensure that it completes 
 > Data factory pipeline may take a while to run, depending on the volume of your data and the scale of the dedidcated SQL pool you had provisioned.
 
 ### 5 Query data in the OMOP schema of the Synapse Dedicated SQL Pool
+Now that the data is loaded, let's run a SQL query to illustrate a common analytical question based on healthcare data. More specifically, let's calculate the distribution of condition durations for COVID-19 patients stratified by gender.
 
-Coming soon.
+```
+--Calculate distribution of condition durations for COVID-19 patients stratified by gender
+SELECT c.concept_id AS ConceptId, 
+          c.concept_name AS Condition,
+          p.gender_source_value AS Gender,
+          DATEDIFF(DAY, ca.condition_era_start_date, ca.condition_era_end_date) AS ConditionDurationDays,
+          count(*) AS Frequency 
+FROM omop.person p 
+            JOIN omop.condition_era AS ca
+                ON p.person_id = ca.person_id
+            JOIN vocab.concept AS c 
+                ON ca.condition_concept_id = c.concept_id
+WHERE c.vocabulary_id = 'SNOMED'
+    AND c.domain_id = 'Condition'
+    AND c.concept_name = 'Covid-19'
+    AND c.invalid_reason IS NULL
+GROUP BY c.concept_id, 
+    c.concept_name,
+    p.gender_source_value,
+    DATEDIFF(DAY, ca.condition_era_start_date, ca.condition_era_end_date)
+ORDER BY ConditionDurationDays ASC
+````
+The following screenshot illustrates how to navigate to the "Develop" hub in Synapse Studio, create a new SQL script, compose a query, run the query and view query results.
+
+![Run SQL Query](Images/SynapseRunSQLQuery.png "Run SQL Query").
+
 
 ### 6 Visualize healthcare data in Power BI
+To start visualizing your healthcare data, download the free [Power BI Desktop](https://powerbi.microsoft.com/en-us/desktop/) application and open the [OMOP Analytics.pbit](Power%20BI/OMOP%20Analytics.pbit) Power BI Template file included in this repository. You will be asked to provide parameter values for the Dedicated SQL Endpoint of your Synapse Analytics Workspace and the name of your SQL Pool. You will also be asked to provide a username and password to log into your dedicated SQL Pool. Once you complete these steps, your Power BI template will be refreshed with data and will display a report page similar to the screenshot below:
 
-Coming soon.
+![Power BI Report](Images/PowerBIReport.png "Power BI Report").
+
+> **Congratulations, you have completed the tutorial!**
 
 ## Contributors <a name="contributors"></a>
 
